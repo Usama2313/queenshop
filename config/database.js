@@ -21,7 +21,7 @@ const sequelize = dbUrl
     : new Sequelize(
         process.env.DB_NAME || "neondb",
         process.env.DB_USER || "neondb_owner",
-        process.env.DB_PASSWORD || "",
+        process.env.DB_PASSWORD || "npg_xKTgrU08nzHd",
         {
             host: process.env.DB_HOST || "ep-purple-hat-anq529vu-pooler.c-6.us-east-1.aws.neon.tech",
             port: process.env.DB_PORT || 5432,
