@@ -87,8 +87,7 @@ try {
         });
     }
 
-    const serverless = require('serverless-http');
-module.exports = serverless(app);
+    module.exports = app;
 
 } catch (globalError) {
     console.error("CRITICAL STARTUP ERROR:", globalError);
@@ -101,5 +100,5 @@ module.exports = serverless(app);
             stack: globalError.stack
         });
     });
-    module.exports = serverless(app);
+    module.exports = app;
 }
