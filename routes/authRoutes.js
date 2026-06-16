@@ -165,5 +165,36 @@ router.put("/admin/block/:id", auth, async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+// ADMIN: Edit user details (including password reset)
+router.put("/admin/user/:id", auth, async (req, res) => {
+    try {
+        if (req.user.role !== "Admin") {
+            return res.status(403).json({ message: "Access denied. Admins only." });
+        }
+        const { name, email, phone, password } = req.body;
+        const userToEdit = await User.findByPk(req.params.id);
+        
+        if (!userToEdit) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const updates = { name, email, phone };
+
+        // If a new password is provided, hash it and update it
+        if (password && password.trim().length > 0) {
+            updates.password = await bcrypt.hash(password, 10);
+        }
+
+        await userToEdit.update(updates);
+        
+        // Don't send back the password hash
+        const updatedUser = { ...userToEdit.toJSON() };
+        delete updatedUser.password;
+
+        res.json({ message: "User updated successfully", user: updatedUser });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 module.exports = { router, auth };
