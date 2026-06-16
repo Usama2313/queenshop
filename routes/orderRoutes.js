@@ -9,7 +9,7 @@ const verifyToken = (req, res, next) => {
     if (!token) return res.status(401).json({ error: "Unauthorized" });
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "best_store_luxury_fallback_key");
         req.user = decoded;
         next();
     } catch (err) {
