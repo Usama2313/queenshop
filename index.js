@@ -14,6 +14,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Health Route
 app.get("/", (req, res) => res.json({ message: "BEST Store Premium API is running", status: "ok" }));
+app.get("/api", (req, res) => res.json({ message: "BEST Store Premium API is running", status: "ok" }));
 
 // Database Sync Route (for Vercel - run once after deploy to add new columns)
 app.get("/api/sync", async (req, res) => {
