@@ -23,7 +23,12 @@ const Product = sequelize.define(
         },
         currency: {
             type: DataTypes.STRING,
-            defaultValue: "BD", // Bahraini Dinar as shown in the Burger Queen screenshots
+            defaultValue: "PKR",
+        },
+        shippingPrice: {
+            type: DataTypes.FLOAT,
+            defaultValue: 0,
+            allowNull: true,
         },
         image: {
             type: DataTypes.TEXT, // Supports URL or base64

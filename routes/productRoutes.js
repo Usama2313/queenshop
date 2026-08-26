@@ -127,7 +127,7 @@ router.post("/", auth, async (req, res) => {
             return res.status(403).json({ message: "Access denied. Admins only." });
         }
 
-        const { title, category, price, currency, image, gallery, description, isBestProduct, isFeatured, brand, stock } = req.body;
+        const { title, category, price, currency, image, gallery, description, isBestProduct, isFeatured, brand, stock, shippingPrice } = req.body;
 
         if (!title || !category || !price) {
             return res.status(400).json({ message: "Title, category, and price are required." });
@@ -137,7 +137,7 @@ router.post("/", auth, async (req, res) => {
             title,
             category,
             price: parseFloat(price),
-            currency: currency || "BD",
+            currency: currency || "PKR",
             image,
             gallery: gallery || "[]",
             description,
@@ -145,6 +145,7 @@ router.post("/", auth, async (req, res) => {
             isFeatured: !!isFeatured,
             brand,
             stock: stock !== undefined ? parseInt(stock) : 50,
+            shippingPrice: shippingPrice !== undefined ? parseFloat(shippingPrice) : 0,
         });
 
         res.status(201).json(product);
@@ -165,7 +166,7 @@ router.put("/:id", auth, async (req, res) => {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        const { title, category, price, currency, image, gallery, description, isBestProduct, isFeatured, brand, stock, isHidden } = req.body;
+        const { title, category, price, currency, image, gallery, description, isBestProduct, isFeatured, brand, stock, isHidden, shippingPrice } = req.body;
 
         await product.update({
             title: title !== undefined ? title : product.title,
@@ -180,6 +181,7 @@ router.put("/:id", auth, async (req, res) => {
             brand: brand !== undefined ? brand : product.brand,
             stock: stock !== undefined ? parseInt(stock) : product.stock,
             isHidden: isHidden !== undefined ? !!isHidden : product.isHidden,
+            shippingPrice: shippingPrice !== undefined ? parseFloat(shippingPrice) : product.shippingPrice,
         });
 
         res.json(product);
