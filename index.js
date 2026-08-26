@@ -78,7 +78,7 @@ try {
     // Start server if running locally (not on Vercel)
     if (!process.env.VERCEL) {
         const sequelize = require("./config/database");
-        sequelize.sync().then(() => {
+        sequelize.sync({ alter: true }).then(() => {
             app.listen(PORT, () => {
                 console.log(`BEST Backend server running on port ${PORT}`);
             });
