@@ -11,7 +11,7 @@ const Order = sequelize.define(
         },
         userId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         totalAmount: {
             type: DataTypes.DECIMAL(10, 2),

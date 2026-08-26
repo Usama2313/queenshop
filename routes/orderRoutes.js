@@ -3,13 +3,29 @@ const router = express.Router();
 const { Order, OrderItem, Product, User } = require("../models/associations");
 const jwt = require("jsonwebtoken");
 
-// Middleware to verify token
+const JWT_SECRET = process.env.JWT_SECRET || "best_store_luxury_fallback_key";
+
+// Optional Token extractor (supports both logged-in and guest users)
+const extractUser = (req, res, next) => {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            req.user = decoded;
+        } catch (err) {
+            req.user = null;
+        }
+    }
+    next();
+};
+
+// Strict Middleware for User-only routes
 const verifyToken = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.headers.authorization?.replace("Bearer ", "");
     if (!token) return res.status(401).json({ error: "Unauthorized" });
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret");
+        const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
     } catch (err) {
@@ -19,26 +35,26 @@ const verifyToken = (req, res, next) => {
 
 // Middleware to verify admin
 const verifyAdmin = (req, res, next) => {
-    if (req.user.role !== "Admin") {
+    if (!req.user || req.user.role !== "Admin") {
         return res.status(403).json({ error: "Admin access required" });
     }
     next();
 };
 
-// Place a new order
-router.post("/place", verifyToken, async (req, res) => {
+// Place a new order (works for both logged in users and guests)
+router.post("/place", extractUser, async (req, res) => {
     try {
         const { items, totalAmount, shippingAddress, paymentMethod } = req.body;
         
         if (!items || items.length === 0) {
-            return res.status(400).json({ error: "No items provided" });
+            return res.status(400).json({ error: "No items provided in cart" });
         }
 
         const newOrder = await Order.create({
-            userId: req.user.id,
-            totalAmount,
+            userId: req.user ? req.user.id : null,
+            totalAmount: parseFloat(totalAmount) || 0,
             shippingAddress: shippingAddress || "Default Address",
-            paymentMethod: paymentMethod || "COD",
+            paymentMethod: paymentMethod || "Cash on Delivery",
             status: "Pending"
         });
 
@@ -46,7 +62,7 @@ router.post("/place", verifyToken, async (req, res) => {
         const orderItemsData = items.map(item => ({
             orderId: newOrder.id,
             productId: item.productId,
-            quantity: item.quantity,
+            quantity: item.quantity || 1,
             priceAtPurchase: item.price
         }));
 
@@ -55,7 +71,7 @@ router.post("/place", verifyToken, async (req, res) => {
         res.status(201).json({ message: "Order placed successfully", order: newOrder });
     } catch (err) {
         console.error("Error placing order:", err);
-        res.status(500).json({ error: "Failed to place order" });
+        res.status(500).json({ error: "Failed to place order: " + err.message });
     }
 });
 
@@ -69,8 +85,7 @@ router.get("/my-orders", verifyToken, async (req, res) => {
                 as: "items",
                 include: [{
                     model: Product,
-                    as: "product",
-                    attributes: ["id", "name", "price", "imageMain"]
+                    as: "product"
                 }]
             }],
             order: [["createdAt", "DESC"]]
@@ -90,15 +105,14 @@ router.get("/all", verifyToken, verifyAdmin, async (req, res) => {
                 {
                     model: User,
                     as: "user",
-                    attributes: ["id", "name", "email"]
+                    attributes: ["id", "name", "email", "phone"]
                 },
                 {
                     model: OrderItem,
                     as: "items",
                     include: [{
                         model: Product,
-                        as: "product",
-                        attributes: ["id", "name"]
+                        as: "product"
                     }]
                 }
             ],
