@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const serverless = require("serverless-http");
 require("dotenv").config();
 
 const app = express();
@@ -73,4 +72,5 @@ if (!process.env.VERCEL) {
     });
 }
 
-module.exports = serverless(app);
+// Export Express app directly for Vercel Node runtime
+module.exports = app;
